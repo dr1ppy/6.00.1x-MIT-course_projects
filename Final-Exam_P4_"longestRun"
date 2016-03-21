@@ -1,0 +1,40 @@
+def longestRun(L):
+    
+    bestestcount = 0
+    
+    if len(L) == 1:
+        
+        return 1
+    
+    else:
+        
+        count = 0
+        bestcount = 0
+                
+        for k in range(len(L) - 1):
+            
+            if L[k] <= L[k+1]:
+                        
+                count += 1   
+                
+                if k+2 == len(L):
+                    
+                    bestcount = count
+                
+                    if bestcount > bestestcount:
+                    
+                        bestestcount = bestcount
+                    
+            elif L[k] > L[k+1]:
+                        
+                bestcount = count
+                
+                if bestcount > bestestcount:
+                
+                    bestestcount = bestcount
+                    
+                count = 0
+                
+    bestestcount += 1
+            
+    return bestestcount
