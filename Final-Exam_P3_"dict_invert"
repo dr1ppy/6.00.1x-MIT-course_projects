@@ -1,0 +1,30 @@
+def dict_invert(d):
+    
+    '''
+    d: dict
+    Returns an inverted dictionary, where the new dictionary's keys are the unique dictionary values in d.
+    The value for a key in the inverse dictionary is a sorted list of all keys in d that have the same value in d.
+    e.g. d = {1:10, 2:20, 3:30, 5:30, 4:30} will return {10:[1], 20:[2], 30:[3, 4, 5]}
+    '''
+    
+    newD = {}
+    
+    for key in d.keys():
+        
+        keysAsValues = []
+        
+        keysAsValues.append(key)
+        
+        for otherkey in d.keys():
+        
+            if otherkey != key: #Checking for duplicate values, excluding the outer loop's key itself.
+                
+                if d[otherkey] == d[key]:
+                
+                    keysAsValues.append(otherkey)
+                    
+        keysAsValues.sort()
+        
+        newD[d[key]] = keysAsValues
+        
+    return newD
