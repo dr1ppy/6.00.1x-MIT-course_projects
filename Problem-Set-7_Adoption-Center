@@ -1,0 +1,211 @@
+class Adopter(object):
+    """ 
+    Adopters represent people interested in adopting a species.
+    They have a desired species type that they want, and their score is
+    simply the number of species that the shelter has of that species.
+    """
+    def __init__(self, name, desired_species):
+        # Your Code Here 
+        self.name = name
+        self.desired_species = desired_species
+    def get_name(self):
+        # Your Code Here 
+        return self.name
+    def get_desired_species(self):
+        # Your Code Here 
+        return self.desired_species
+    def get_score(self, adoption_center):
+        # Your Code Here 
+        
+        num_desired = adoption_center.get_number_of_species(self.get_desired_species())
+        score = float(1 * num_desired)
+        return score
+
+class FlexibleAdopter(Adopter):
+    """
+    A FlexibleAdopter still has one type of species that they desire,
+    but they are also alright with considering other types of species.
+    considered_species is a list containing the other species the adopter will consider
+    Their score should be 1x their desired species + .3x all of their desired species
+    """
+    # Your Code Here, should contain an __init__ and a get_score method.
+    def __init__(self, name, desired_species, considered_species):
+        Adopter.__init__(self, name, desired_species)
+        self.considered_species = considered_species
+
+    def get_score(self, adoption_center):
+        adopter_score = Adopter.get_score(self, adoption_center)
+        
+        num_other = 0
+        animals = adoption_center.get_species_count()
+        
+        for animal in self.considered_species:
+            num_other += adoption_center.get_number_of_species(animal)
+            
+        
+        return adopter_score + (0.3 * num_other)
+        
+class FearfulAdopter(Adopter):
+    """
+    A FearfulAdopter is afraid of a particular species of animal.
+    If the adoption center has one or more of those animals in it, they will
+    be a bit more reluctant to go there due to the presence of the feared species.
+    Their score should be 1x number of desired species - .3x the number of feared species
+    """
+    # Your Code Here, should contain an __init__ and a get_score method.
+    def __init__(self, name, desired_species, feared_species):
+        Adopter.__init__(self, name, desired_species)
+        self.feared_species = feared_species
+        
+    def get_score(self, adoption_center):
+        adopter_score = Adopter.get_score(self, adoption_center)
+        
+        
+        num_feared = adoption_center.get_number_of_species(self.feared_species)
+        
+        score = adopter_score - (0.3 * num_feared)
+        
+        
+        return max(score, 0.0)
+
+class AllergicAdopter(Adopter):
+    """
+    An AllergicAdopter is extremely allergic to a one or more species and cannot
+    even be around it a little bit! If the adoption center contains one or more of
+    these animals, they will not go there.
+    Score should be 0 if the center contains any of the animals, or 1x number of desired animals if not
+    """
+    # Your Code Here, should contain an __init__ and a get_score method.
+    def __init__(self, name, desired_species, allergic_species):
+        Adopter.__init__(self, name, desired_species)
+        self.allergic_species = allergic_species
+        
+    def get_score(self, adoption_center):
+        #print 'name', self.name
+        #print 'desired_species', self.desired_species
+        #print 'allergic_species', self.allergic_species
+        #print 'adoption_center.get_species_count()', adoption_center.get_species_count()
+        
+        animals = adoption_center.get_species_count()
+        for animal in self.allergic_species:
+            if animal in animals.keys():
+                return 0.0
+            elif 'Lizard' in animals.keys() and 'Lizard' in self.allergic_species:
+                return 0.0
+            else:
+                score = Adopter.get_score(self, adoption_center)
+                return float(score)
+        
+
+class MedicatedAllergicAdopter(AllergicAdopter):
+    """
+    A MedicatedAllergicAdopter is extremely allergic to a particular species
+    However! They have a medicine of varying effectiveness, which will be given in a dictionary
+    To calculate the score for a specific adoption center, we want to find what is the most allergy-inducing species that the adoption center has for the particular MedicatedAllergicAdopter. 
+    To do this, first examine what species the AdoptionCenter has that the MedicatedAllergicAdopter is allergic to, then compare them to the medicine_effectiveness dictionary. 
+    Take the lowest medicine_effectiveness found for these species, and multiply that value by the Adopter's calculate score method.
+    """
+    def __init__(self, name, desired_species, allergic_species, medicine_effectiveness):
+        AllergicAdopter.__init__(self, name, desired_species, allergic_species)
+        self.medicine_effectiveness = medicine_effectiveness
+        
+    def get_score(self, adoption_center):
+        adopter_score = Adopter.get_score(self, adoption_center)
+        animals = adoption_center.get_species_count()
+        keepWorstScore = 1.0
+        for animal in animals:
+            if self.medicine_effectiveness.get(animal, 1.0) < keepWorstScore:
+                keepWorstScore = self.medicine_effectiveness.get(animal, 1.0)
+        score = float(adopter_score) * float(keepWorstScore)
+        return score
+        
+
+class SluggishAdopter(Adopter):
+    """
+    A SluggishAdopter really dislikes travelleng. The further away the
+    AdoptionCenter is linearly, the less likely they will want to visit it.
+    Since we are not sure the specific mood the SluggishAdopter will be in on a
+    given day, we will asign their score with a random modifier depending on
+    distance as a guess.
+    Score should be
+    If distance < 1 return 1 x number of desired species
+    elif distance < 3 return random between (.7, .9) times number of desired species
+    elif distance < 5. return random between (.5, .7 times number of desired species
+    else return random between (.1, .5) times number of desired species
+    """
+    # Your Code Here, should contain an __init__ and a get_score method.
+    def __init__(self, name, desired_species, location):
+        Adopter.__init__(self, name, desired_species)
+        self.location = (float(location[0]), float(location[1]))
+    def get_linear_distance(self, to_location):
+        import math 
+        d = math.sqrt((self.location[0] - to_location.get_location()[0])**2 + (self.location[1] - to_location.get_location()[1])**2)
+        return float(d)
+    
+    def get_score(self, adoption_center):
+        import random
+        d = self.get_linear_distance(adoption_center)
+        score = Adopter.get_score(self, adoption_center)
+        if d < 1.0:
+            return score
+        elif d >= 1.0 and d < 3.0:
+            return score * random.uniform(0.7, 0.9)
+        elif d >= 3.0 and d < 5:
+            return score * random.uniform(0.5, 0.7)
+        elif d >= 5:
+            return score * random.uniform(0.1, 0.5)
+        
+
+def get_ordered_adoption_center_list(adopter, list_of_adoption_centers):
+    """
+    The method returns a list of an organized adoption_center such 
+    that the scores for each AdoptionCenter to the Adopter will be ordered 
+    from highest score to lowest score.
+    """
+    # Your Code Here 
+    score = 0
+    center_list_and_value = []
+    
+    for adoption_center in list_of_adoption_centers:
+        score = adopter.get_score(adoption_center)
+        center_list_and_value.append((score, adoption_center, adoption_center.get_name()))
+        
+    def getKey(item):
+        return item[0]
+    def getKey2(item):
+        return item[1]
+    def getKey3(item):
+        return item[2]
+        
+    newlist = sorted(center_list_and_value, key = getKey3)
+    newlist = sorted(center_list_and_value, key = getKey, reverse = True)
+
+    lastlist = []
+    for i in range(len(newlist)):
+        lastlist.append(newlist[i][1])
+    return lastlist
+            
+        
+def get_adopters_for_advertisement(adoption_center, list_of_adopters, n):
+    """
+    The function returns a list of the top n scoring Adopters 
+    from list_of_adopters (in numerical order of score)
+    """
+    adopter_list = []
+    
+    for adopter in list_of_adopters:
+        score = adopter.get_score(adoption_center)
+        adopter_list.append((score, adopter, adopter.get_name()))
+        
+    newnewlist = sorted(adopter_list, key = lambda x: (x[2], -x[0]))
+
+    lastlastlist = []
+    
+    for i in range(len(newnewlist)):
+        lastlastlist.append(newnewlist[i][1])
+    
+    if n > len(lastlastlist):
+        return lastlastlist
+    else:
+        return lastlastlist[:n]
+    
