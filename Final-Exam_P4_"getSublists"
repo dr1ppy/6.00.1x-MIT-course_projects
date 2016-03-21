@@ -1,0 +1,57 @@
+def getSublists(L, n):
+
+  '''
+  returns a list of all possible sublists in L of length n without skipping elements in L. 
+  The sublists in the returned list should be ordered in the way they appear in L, with 
+  those sublists starting from a smaller index being at the front of the list.
+  '''
+    
+    assert L != [], 'list must be non-empty'
+    assert n > 0, 'n must be greater than zero'
+    
+    listoflists = []
+    
+    if len(L) == 1:
+        
+        newlist = []
+        newlist.append(L)
+        return newlist
+    
+    else:
+        
+        for i in range((len(L) - n) + 1):
+            
+            listoflists.append(L[i:i+n])
+            
+        return listoflists
+        
+        
+def listoflists(L, n, theList):
+    
+    '''
+    recursive implementation
+    '''
+    
+    assert theList == [], '3rd argument must be an empty list'
+    assert n > 1, 'n must be greater than 1'
+        
+    if n > len(L):
+        
+        return 'Sorry, cannot build: sublist length is longer than the list'
+    
+    elif len(L) == 0:
+        
+        return []
+    
+    elif len(L) == n:
+        
+        theList.append(L[0:n])
+            
+        return theList
+         
+    else:
+        
+       theList.append(L[0:n])
+       
+       listoflists(L[1:], n, theList)
+             
